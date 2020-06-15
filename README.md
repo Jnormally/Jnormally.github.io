@@ -1,2 +1,2 @@
-# hjjadmin.github.io
-hjjadmin.github.io
+# Jnormally.github.io
+jnormally.github.io
