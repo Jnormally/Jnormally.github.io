@@ -228,7 +228,7 @@
             .price-display::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(233,69,96,0.2) 0%, transparent 70%); }
             .price-label { font-size: 0.85rem; opacity: 0.7; margin-bottom: 10px; letter-spacing: 0.1em; }
             .price-value { font-size: 2.8rem; font-weight: 300; color: var(--gold); }
-            .price-value::before { content: '¥'; font-size: 1.5rem; margin-right: 5px; }
+            .price-value::before { content: ''; font-size: 1.5rem; margin-right: 5px; }
             .price-note { font-size: 0.8rem; opacity: 0.6; margin-top: 10px; }
             .submit-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 500; letter-spacing: 0.1em; cursor: pointer; transition: all 0.4s; margin-top: 20px; }
             .submit-btn:hover { background: var(--accent-light); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(233,69,96,0.3); }
@@ -238,13 +238,17 @@
             <p class="section-subtitle">根据您的需求快速报价</p>
             <div class="pricing-tabs">
                 <button class="pricing-tab active" onclick="switchPanel('sculpture')">🗿 不锈钢雕塑</button>
-                <button class="pricing-tab" onclick="switchPanel('sign')">🚏 标识制作</button>
+                <button class="pricing-tab active" onclick="switchPanel('sculpture')">🧸 玻璃钢雕塑</button>       
             </div>
-
+            <div class="pricing-tabs">   
+                <button class="pricing-tab" onclick="switchPanel('sculpture')">🪵 木质雕塑品 </button>
+                <button class="pricing-tab" onclick="switchPanel('sculpture')">🚏 广告标识牌</button>
+            </div>
+       
             <!-- 不锈钢雕塑核算 -->
-            <div class="pricing-panel active" id="sculpture-panel">
-                <div class="pricing-card">
-                    <div class="form-group">
+            <div class="pricing-panel active" id="sculpture-panel" >
+                <div class="pricing-card" style="display: none;">
+                    <div class="form-group"">
                         <label class="form-label">造型类型</label>
                         <div class="radio-group">
                             <input type="radio" name="shape" id="geo" value="geo" class="radio-input" checked onchange="updateSculptureCalc()">
@@ -282,7 +286,7 @@
                             <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.75rem; color: var(--gray);"><span>20cm</span><span>大型 (&gt;60cm)</span></div>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="display: none;">
                         <label class="form-label">难度等级</label>
                         <div class="radio-group">
                             <input type="radio" name="difficulty" id="normal" value="normal" class="radio-input" checked onchange="updateSculptureCalc()">
@@ -291,7 +295,7 @@
                             <label class="radio-label" for="hard">复杂/高标准</label>
                         </div>
                     </div>
-                    <div class="calc-detail">
+                    <div class="calc-detail" style="display: none;">
                         <div class="calc-detail-title">💰 计算明细</div>
                         <div class="calc-detail-item"><span>长×宽×高</span><span class="calc-detail-value" id="sizeDetail">0.6×0.4×0.8 m</span></div>
                         <div class="calc-detail-item"><span>估算表面积</span><span class="calc-detail-value" id="surfaceArea">~1.8 ㎡</span></div>
@@ -308,9 +312,9 @@
             </div>
 
             <!-- 标识核算 -->
-            <div class="pricing-panel" id="sign-panel">
-                <div class="pricing-card">
-                    <div class="form-group">
+            <div class="pricing-panel" id="sign-panel" style="display: none;">
+                <div class="pricing-card" >
+                    <div class="form-group" style="display: none;">
                         <label class="form-label">标识类型</label>
                         <select class="form-select" id="signType" onchange="updateSignCalc()">
                             <option value="led">发光字 · ¥500/米</option>
@@ -327,7 +331,7 @@
                             <option value="1505">6米以上 · ¥1505/米</option>
                         </select>
                     </div>
-                    <div class="form-row">
+                    <div class="form-row" style="display: none;">
                         <div class="form-group">
                             <label class="form-label">尺寸 (长/m)</label>
                             <input type="number" class="form-input" id="signLength" value="1" min="0.1" step="0.1" oninput="updateSignCalc()">
@@ -337,7 +341,7 @@
                             <input type="number" class="form-input" id="signWidth" value="0.5" min="0.1" step="0.1" oninput="updateSignCalc()">
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="display: none;">
                         <label class="form-label">安装方式</label>
                         <select class="form-select" id="installType" onchange="updateSignCalc()">
                             <option value="none">无需安装</option>
@@ -345,19 +349,20 @@
                             <option value="crane50">50吨吊车 · ¥2000/8h</option>
                         </select>
                     </div>
-                    <div class="calc-detail">
+                    <div class="calc-detail" style="display: none;">
                         <div class="calc-detail-title">💰 计算明细</div>
                         <div class="calc-detail-item"><span>制作费用</span><span class="calc-detail-value" id="makePrice">¥500</span></div>
                         <div class="calc-detail-item"><span>安装费用</span><span class="calc-detail-value" id="installPrice">¥0</span></div>
                     </div>
                     <div class="price-display">
                         <div class="price-label">预估价格</div>
-                        <div class="price-value" id="signPrice">500</div>
+                        <div class="price-value" id="signPrice">0</div>
                         <div class="price-note">最终价格以实际测量为准</div>
                     </div>
                     <button type="button" class="submit-btn" onclick="submitInquiry('sign')">提交询价</button>
                 </div>
             </div>
+            
         </div>
     </section>
 
@@ -789,7 +794,7 @@
                 if(surfaceAreaEl) surfaceAreaEl.textContent = '- ㎡';
                 if(unitPriceEl) unitPriceEl.textContent = '¥-/㎡';
                 if(calcMethodEl) calcMethodEl.textContent = '-';
-                if(sculpturePriceEl) sculpturePriceEl.textContent = '0';
+                if(sculpturePriceEl) sculpturePriceEl.textContent = '请联系客服获取详细报价⬇️';
                 return;
             }
             
