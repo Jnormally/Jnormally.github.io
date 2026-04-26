@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>君德艺术雕塑 | JunDe Sculpture</title>
+    <style>
+        :root { --primary: #1a1a2e; --primary-light: #16213e; --accent: #e94560; --accent-light: #ff6b6b; --gold: #d4af37; --gold-light: #f0d878; --cream: #faf8f5; --gray: #6c757d; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+        img { -webkit-user-drag: none; -moz-user-drag: none; user-drag: none; pointer-events: auto; }
+        .modal-body img { pointer-events: none; }
+        .image-container { position: relative; }
+        .image-container::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: transparent; }
+        html { scroll-behavior: smooth; overscroll-behavior: contain; }
+        body { overscroll-behavior-y: contain; }
+        
+        /* 下拉刷新 */
+        .pull-refresh { position: fixed; top: -50px; left: 0; right: 0; height: 50px; display: flex; align-items: center; justify-content: center; background: linear-gradient(to bottom, var(--accent), transparent); color: white; font-size: 0.9rem; transition: top 0.3s; z-index: 10001; opacity: 0; }
+        .pull-refresh.active { top: 0; opacity: 1; }
+        .pull-refresh-icon { animation: pullRotate 1s infinite linear; display: none; }
+        .pull-refresh.active .pull-refresh-icon { display: inline-block; }
+        .pull-refresh.active .pull-refresh-text { display: none; }
+        @keyframes pullRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", Arial, sans-serif; background: var(--cream); color: var(--primary); line-height: 1.6; overflow-x: hidden; }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section {  padding: 80px 0; display: flex; flex-direction: column; justify-content: center; }
+        .section-title { font-size: 2.2rem; font-weight: 300; text-align: center; margin-bottom: 1rem; letter-spacing: 0.15em; }
+        .section-subtitle { text-align: center; color: var(--gray); margin-bottom: 3rem; font-size: 0.95rem; }
+        
+        /* Logo动画 */
+        .logo-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 2rem; opacity: 0; animation: fadeInUp 1s ease forwards 0.3s; }
+        .logo-icon { width: 70px; height: 70px; position: relative; display: flex; align-items: center; justify-content: center; }
+        .logo-shape { position: absolute; border-radius: 50%; }
+        .logo-shape-1 { width: 70px; height: 70px; background: linear-gradient(135deg, var(--accent), var(--gold)); opacity: 0.3; animation: logoPulse1 3s ease-in-out infinite; }
+        .logo-shape-2 { width: 55px; height: 55px; background: linear-gradient(135deg, var(--accent-light), var(--gold-light)); opacity: 0.5; animation: logoPulse2 3s ease-in-out infinite 0.5s; }
+        .logo-shape-3 { width: 40px; height: 40px; background: linear-gradient(135deg, var(--gold), #fff); box-shadow: 0 4px 20px rgba(233,69,96,0.4); animation: logoPulse3 3s ease-in-out infinite 1s; }
+        .logo-text-inner { position: relative; z-index: 10; font-size: 1.4rem; font-weight: 700; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        @keyframes logoPulse1 { 0%,100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.15); opacity: 0.5; } }
+        @keyframes logoPulse2 { 0%,100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 0.7; } }
+        @keyframes logoPulse3 { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); box-shadow: 0 8px 30px rgba(233,69,96,0.6); } }
+        .logo-name { display: flex; flex-direction: column; align-items: flex-start; }
+        .logo-name-main { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.3em; color: #fff; }
+        .logo-name-sub { font-size: 0.7rem; letter-spacing: 0.2em; color: var(--gold); margin-top: 4px; }
+        
+        /* Hero */
+        .hero { min-height: 100vh; background: linear-gradient(135deg, var(--primary) 0%, #16213e 50%, #0f3460 100%); position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .hero::before { content: ''; position: absolute; top: -50%; right: -30%; width: 80%; height: 150%; background: radial-gradient(ellipse, rgba(233,69,96,0.12) 0%, transparent 70%); animation: pulse 8s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 0.8; } }
+        .hero-content { text-align: center; z-index: 10; padding: 20px; }
+        .hero-slogan { font-size: 0.85rem; letter-spacing: 0.5em; color: var(--gold); margin-top: 1.5rem; opacity: 0; animation: fadeInUp 1s ease forwards 0.6s; }
+        .hero-title { font-size: clamp(2rem, 8vw, 4rem); font-weight: 100; color: white; letter-spacing: 0.15em; line-height: 1.2; margin: 1rem 0; opacity: 0; animation: fadeInUp 1s ease forwards 0.9s; }
+        .hero-desc { font-size: 1rem; color: rgba(255,255,255,0.7); max-width: 500px; margin: 0 auto 2rem; opacity: 0; animation: fadeInUp 1s ease forwards 1.2s; }
+        .hero-cta { display: inline-flex; align-items: center; gap: 10px; padding: 16px 45px; background: var(--accent); color: white; text-decoration: none; border-radius: 50px; font-size: 0.95rem; letter-spacing: 0.15em; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; animation: fadeInUp 1s ease forwards 1.5s; }
+        .hero-cta:hover { background: var(--accent-light); transform: translateY(-3px); box-shadow: 0 15px 35px rgba(233,69,96,0.4); }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Works 案例 — 单长图直接展示 */
+        .works { background: var(--primary); color: white; }
+        .works .section-title { color: white; }
+        .works .section-subtitle { color: rgba(255,255,255,0.5); }
+
+        /* 案例图片容器 */
+        .works-img-wrap {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-top: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            background: #1a1a2e;
+            /* 图片自然高度决定容器高度，不限制 */
+        }
+
+        /* 加载中状态 */
+        .works-img-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 60px 20px;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+        .works-img-loading.hidden { display: none; }
+        .works-img-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        /* 核心防下载：透明遮罩叠加在图片上 */
+        .works-img-blocker {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 2;
+            background: transparent;
+            /* 不设 pointer-events:none，让它拦截长按/右键 */
+            pointer-events: all;
+        }
+
+        /* 案例图片本身 */
+        .works-direct-img {
+            display: block;
+            width: 100%;
+            height: auto;
+            position: relative;
+            z-index: 1;
+            /* 防下载关键属性 */
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            user-drag: none;
+            pointer-events: none;
+            -webkit-touch-callout: none;
+            -webkit-print-color-adjust: exact;
+        }
+        .works-direct-img.hidden { display: none; }
+
+        /* 底部提示 */
+        .works-img-tip {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        /* 滚动条美化 */
+        .works-img-wrap::-webkit-scrollbar { width: 4px; }
+        .works-img-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+        .works-img-wrap::-webkit-scrollbar-track { background: transparent; }
+    </style>
+</head>
+<body>
+    <!-- 下拉刷新 -->
+    <div class="pull-refresh" id="pullRefresh">
+        <span class="pull-refresh-icon">↻</span>
+        <span class="pull-refresh-text">↓ 下拉刷新</span>
+    </div>
+    <!-- Loading -->
+    <div class="loading" id="loading" style="position: fixed; inset: 0; background: var(--primary); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999;">
+        <div style="width: 60px; height: 60px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <div style="color: white; margin-top: 20px; letter-spacing: 0.3em;">君德艺术</div>
+    </div>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+
+    <!-- Hero -->
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <div class="logo-shape logo-shape-1"></div>
+                    <div class="logo-shape logo-shape-2"></div>
+                    <div class="logo-shape logo-shape-3"></div>
+                    <span class="logo-text-inner">JD</span>
+                </div>
+                <div class="logo-name">
+                    <span class="logo-name-main">君德艺术雕塑</span>
+                    <span class="logo-name-sub">JUNDE SCULPTURE</span>
+                </div>
+            </div>
+            <p style="font-size: 0.85rem; letter-spacing: 0.5em; color: var(--gold); margin-bottom: 1rem;">ART & DESIGN STUDIO</p>
+            <h1 class="hero-title">匠心雕琢<br>艺术永恒</h1>
+            <p class="hero-desc">专注不锈钢/玻璃钢雕塑 · 木质 · 标识 · 艺术定制</p>
+            <a href="#pricing" class="hero-cta">免费报价 ↓</a>
+        </div>
+    </section>
+
+    <!-- Works 案例（单长图，直接展示） -->
+    <section class="works section" id="works">
+        <div class="container">
+            <h2 class="section-title">作品案例</h2>
+            <p class="section-subtitle">君德艺术 · 全部案例展示</p>
+
+            <!-- 案例长图展示区（直接加载，无点击） -->
+            <div class="works-img-wrap" id="worksImgWrap">
+                <div class="works-img-loading" id="worksImgLoading">
+                    <div class="works-img-spinner"></div>
+                    <span>案例图加载中...</span>
+                </div>
+                <!-- 防下载保护：透明遮罩叠加在图片上 -->
+                <div class="works-img-blocker"></div>
+                <img
+                    id="worksDirectImg"
+                    src="static/01.jpg"
+                    alt="君德艺术作品案例"
+                    class="works-direct-img"
+                />
+            </div>
+
+            <p class="works-img-tip">📌 图片受保护 · 右键/长按/保存已禁用</p>
+        </div>
+    </section>
+
+    <!-- Pricing 价格核算 -->
+    <section class="pricing section" id="pricing" style="background: linear-gradient(180deg, var(--cream) 0%, #f0ebe3 100%);">
+        <style>
+            .pricing-tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+            .pricing-tab { padding: 15px 35px; background: white; border: 2px solid transparent; border-radius: 12px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.4s; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+            .pricing-tab.active { border-color: var(--accent); color: var(--accent); }
+            .pricing-tab:hover { transform: translateY(-3px); box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+            .pricing-panel { display: none; }
+            .pricing-panel.active { display: block; }
+            .pricing-card { background: white; border-radius: 24px; padding: 40px 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); max-width: 700px; margin: 0 auto; }
+            .form-group { margin-bottom: 25px; }
+            .form-label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 10px; color: var(--primary); }
+            .form-select, .form-input { width: 100%; padding: 16px 20px; border: 2px solid #eee; border-radius: 12px; font-size: 1rem; background: var(--cream); transition: all 0.4s; }
+            .form-select:focus, .form-input:focus { outline: none; border-color: var(--accent); background: white; }
+            .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+            @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+            .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
+            .radio-label { flex: 1; min-width: 100px; padding: 14px 20px; background: var(--cream); border: 2px solid #eee; border-radius: 12px; text-align: center; cursor: pointer; transition: all 0.4s; font-size: 0.9rem; }
+            .radio-label:hover { border-color: var(--accent-light); }
+            .radio-input { display: none; }
+            .radio-input:checked + .radio-label { background: var(--accent); border-color: var(--accent); color: white; }
+            .size-slider-container { background: var(--cream); padding: 20px; border-radius: 12px; }
+            .size-value { font-size: 1.5rem; font-weight: 600; color: var(--accent); }
+            .size-slider { width: 100%; height: 8px; -webkit-appearance: none; background: #ddd; border-radius: 4px; outline: none; }
+            .size-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: var(--accent); border-radius: 50%; cursor: pointer; box-shadow: 0 4px 15px rgba(233,69,96,0.4); }
+            .calc-detail { background: var(--cream); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+            .calc-detail-title { font-size: 0.85rem; color: var(--gray); margin-bottom: 10px; }
+            .calc-detail-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 0.9rem; }
+            .calc-detail-item:last-child { border-bottom: none; }
+            .calc-detail-value { color: var(--primary); font-weight: 500; }
+            .price-display { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: 35px; border-radius: 20px; text-align: center; margin-top: 30px; position: relative; overflow: hidden; }
+            .price-display::before { content: ''; position: absolute; top: -50%; right: -50%; width: 100%; height: 100%; background: radial-gradient(circle, rgba(233,69,96,0.2) 0%, transparent 70%); }
+            .price-label { font-size: 0.85rem; opacity: 0.7; margin-bottom: 10px; letter-spacing: 0.1em; }
+            .price-value { font-size: 2.8rem; font-weight: 300; color: var(--gold); }
+            .price-value::before { content: '¥'; font-size: 1.5rem; margin-right: 5px; }
+            .price-note { font-size: 0.8rem; opacity: 0.6; margin-top: 10px; }
+            .submit-btn { width: 100%; padding: 18px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 500; letter-spacing: 0.1em; cursor: pointer; transition: all 0.4s; margin-top: 20px; }
+            .submit-btn:hover { background: var(--accent-light); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(233,69,96,0.3); }
+        </style>
+        <div class="container">
+            <h2 class="section-title">价格核算</h2>
+            <p class="section-subtitle">根据您的需求快速报价</p>
+            <div class="pricing-tabs">
+                <button class="pricing-tab active" onclick="switchPanel('sculpture')">🗿 不锈钢雕塑</button>
+                <button class="pricing-tab" onclick="switchPanel('sign')">🚏 标识制作</button>
+            </div>
+
+            <!-- 不锈钢雕塑核算 -->
+            <div class="pricing-panel active" id="sculpture-panel">
+                <div class="pricing-card">
+                    <div class="form-group">
+                        <label class="form-label">造型类型</label>
+                        <div class="radio-group">
+                            <input type="radio" name="shape" id="geo" value="geo" class="radio-input" checked onchange="updateSculptureCalc()">
+                            <label class="radio-label" for="geo">几何类</label>
+                            <input type="radio" name="shape" id="irregular" value="irregular" class="radio-input" onchange="updateSculptureCalc()">
+                            <label class="radio-label" for="irregular">异形类</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">表面处理</label>
+                        <div class="radio-group">
+                            <input type="radio" name="surface" id="mirror" value="mirror" class="radio-input" checked onchange="updateSculptureCalc()">
+                            <label class="radio-label" for="mirror">镜面/拉丝</label>
+                            <input type="radio" name="surface" id="paint" value="paint" class="radio-input" onchange="updateSculptureCalc()">
+                            <label class="radio-label" for="paint">油漆</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">尺寸测量（单位：米）</label>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px;">
+                            <div>
+                                <input type="number" class="form-input" id="sculptureLength" placeholder="长度"  min="0.1" oninput="updateSculptureCalc()" style="text-align: center;">
+                                <div style="text-align: center; font-size: 0.75rem; color: var(--gray); margin-top: 5px;">长</div>
+                            </div>
+                            <div>
+                                <input type="number" class="form-input" id="sculptureWidth" placeholder="宽度"  min="0.1" oninput="updateSculptureCalc()" style="text-align: center;">
+                                <div style="text-align: center; font-size: 0.75rem; color: var(--gray); margin-top: 5px;">宽</div>
+                            </div>
+                            <div>
+                                <input type="number" class="form-input" id="sculptureHeight" placeholder="高度"  min="0.1" oninput="updateSculptureCalc()" style="text-align: center;">
+                                <div style="text-align: center; font-size: 0.75rem; color: var(--gray); margin-top: 5px;">高</div>
+                            </div>
+                        </div>
+                            <input type="range" class="size-slider" id="sizeSlider" min="20" max="600"  oninput="document.getElementById('sizeValue').textContent=this.value;updateSculptureCalc()">
+                            <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.75rem; color: var(--gray);"><span>20cm</span><span>大型 (&gt;60cm)</span></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">难度等级</label>
+                        <div class="radio-group">
+                            <input type="radio" name="difficulty" id="normal" value="normal" class="radio-input" checked onchange="updateSculptureCalc()">
+                            <label class="radio-label" for="normal">普通</label>
+                            <input type="radio" name="difficulty" id="hard" value="hard" class="radio-input" onchange="updateSculptureCalc()">
+                            <label class="radio-label" for="hard">复杂/高标准</label>
+                        </div>
+                    </div>
+                    <div class="calc-detail">
+                        <div class="calc-detail-title">💰 计算明细</div>
+                        <div class="calc-detail-item"><span>长×宽×高</span><span class="calc-detail-value" id="sizeDetail">0.6×0.4×0.8 m</span></div>
+                        <div class="calc-detail-item"><span>估算表面积</span><span class="calc-detail-value" id="surfaceArea">~1.8 ㎡</span></div>
+                        <div class="calc-detail-item"><span>基础单价</span><span class="calc-detail-value" id="unitPrice">¥1,500/㎡</span></div>
+                        <div class="calc-detail-item"><span>计算方式</span><span class="calc-detail-value" id="calcMethod">几何近似法</span></div>
+                    </div>
+                    <div class="price-display">
+                        <div class="price-label">预估价格</div>
+                        <div class="price-value" id="sculpturePrice">1,500</div>
+                        <div class="price-note">最终价格以实际测量为准</div>
+                    </div>
+                    <button type="button" class="submit-btn" onclick="submitInquiry('sculpture')">提交询价</button>
+                </div>
+            </div>
+
+            <!-- 标识核算 -->
+            <div class="pricing-panel" id="sign-panel">
+                <div class="pricing-card">
+                    <div class="form-group">
+                        <label class="form-label">标识类型</label>
+                        <select class="form-select" id="signType" onchange="updateSignCalc()">
+                            <option value="led">发光字 · ¥500/米</option>
+                            <option value="box">灯箱 · ¥950/平方米</option>
+                            <option value="stand">立牌 · ¥750-1505/米</option>
+                            <option value="ground">落地字 · ¥1500/米</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="standHeightRow" style="display: none;">
+                        <label class="form-label">立牌高度</label>
+                        <select class="form-select" id="standHeight" onchange="updateSignCalc()">
+                            <option value="750">4米以下 · ¥750/米</option>
+                            <option value="950">4-6米 · ¥950/米</option>
+                            <option value="1505">6米以上 · ¥1505/米</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">尺寸 (长/m)</label>
+                            <input type="number" class="form-input" id="signLength" value="1" min="0.1" step="0.1" oninput="updateSignCalc()">
+                        </div>
+                        <div class="form-group" id="signWidthGroup">
+                            <label class="form-label">尺寸 (宽/m)</label>
+                            <input type="number" class="form-input" id="signWidth" value="0.5" min="0.1" step="0.1" oninput="updateSignCalc()">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">安装方式</label>
+                        <select class="form-select" id="installType" onchange="updateSignCalc()">
+                            <option value="none">无需安装</option>
+                            <option value="cement">水泥基础 · ¥600/方</option>
+                            <option value="crane50">50吨吊车 · ¥2000/8h</option>
+                        </select>
+                    </div>
+                    <div class="calc-detail">
+                        <div class="calc-detail-title">💰 计算明细</div>
+                        <div class="calc-detail-item"><span>制作费用</span><span class="calc-detail-value" id="makePrice">¥500</span></div>
+                        <div class="calc-detail-item"><span>安装费用</span><span class="calc-detail-value" id="installPrice">¥0</span></div>
+                    </div>
+                    <div class="price-display">
+                        <div class="price-label">预估价格</div>
+                        <div class="price-value" id="signPrice">500</div>
+                        <div class="price-note">最终价格以实际测量为准</div>
+                    </div>
+                    <button type="button" class="submit-btn" onclick="submitInquiry('sign')">提交询价</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <!-- 微信二维码弹窗（showQRCode 复用） -->
+    <style>
+        .case-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .case-modal-overlay.active { display: flex; }
+        .case-modal-wrap {
+            background: #1a1a2e;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .case-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .case-modal-title { color: white; font-size: 1.1rem; font-weight: 500; }
+        .case-modal-close {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        .case-modal-close:hover { transform: scale(1.1); }
+        .case-modal-body { padding: 20px; text-align: center; }
+        .case-modal-body img {
+            width: 260px;
+            height: 260px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .case-modal-body p {
+            margin-top: 14px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+        }
+        
+    </style>
+    <div class="case-modal-overlay" id="caseModal" onclick="if(event.target===this)document.getElementById('caseModal').classList.remove('active');document.body.style.overflow='';">
+        <div class="case-modal-wrap" onclick="event.stopPropagation()">
+            <div class="case-modal-header">
+                <span class="case-modal-title">扫码添加微信</span>
+                <button class="case-modal-close" onclick="document.getElementById('caseModal').classList.remove('active');document.body.style.overflow='';">×</button>
+            </div>
+            <div class="case-modal-body">
+                <img id="caseFullImg" src="static/wechat-qrcode.png" alt="微信二维码" />
+                <p>打开微信扫一扫添加</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact 联系方式 -->
+    <section class="contact section" id="contact" style="background: var(--primary); color: white; position: relative; overflow: hidden;">
+        <style>
+            .contact-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+            @media (min-width: 768px) { .contact-grid { grid-template-columns: repeat(4, 1fr); max-width: 800px; } }
+            .contact-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px 10px; text-align: center; transition: all 0.4s; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; height: 160px; }
+            .contact-item:hover { background: rgba(255,255,255,0.1); transform: translateY(-5px); }
+            .contact-icon { width: 55px; height: 55px; background: linear-gradient(135deg, var(--accent), var(--accent-light)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; font-size: 1.3rem; }
+            .contact-label { font-size: 0.8rem; color: var(--gray); margin-bottom: 8px; }
+            .contact-value { font-size: 0.85rem; line-height: 1.4; word-break: break-word; }
+            .contact-value a { color: white; text-decoration: none; transition: all 0.4s; }
+            .contact-value a:hover { color: var(--accent); }
+            .wechat-qrcode { background: white; border-radius: 20px; padding: 30px; text-align: center; margin-top: 30px; }
+            .qrcode-img { width: 180px; height: 180px; border-radius: 12px; object-fit: cover; margin: 0 auto 15px; border: 3px solid var(--cream); }
+            .qrcode-img { width: 180px; height: 180px; background: var(--cream); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 15px; color: var(--gray); border: 2px dashed var(--gray); cursor: pointer; }
+            .qrcode-img span { font-size: 3rem; margin-bottom: 8px; }
+            .qrcode-text { color: var(--primary); font-weight: 500; }
+            .qrcode-hint { font-size: 0.8rem; color: var(--primary); cursor: pointer; text-decoration: underline; }
+            .qrcode-hint:hover { color: var(--primary-dark); }
+            .map-container { width: 100%; height: 280px; border-radius: 20px; overflow: hidden; margin-top: 30px; border: 1px solid rgba(255,255,255,0.1); }
+            .map-container iframe { width: 100%; height: 100%; border: none; }
+        </style>
+        <div class="container">
+            <h2 class="section-title">联系我们</h2>
+            <p class="section-subtitle">期待与您的合作</p>
+            <div class="contact-grid">
+                <div class="contact-item">
+                    <div class="contact-icon">📞</div>
+                    <div class="contact-label">电话咨询</div>
+                    <div class="contact-value"><a href="tel:132-6623-8788">132-6623-8788</a></div>
+                </div>
+                <div class="contact-item" onclick="showQRCode()" style="cursor:pointer;">
+                    <div class="contact-icon">💬</div>
+                    <div class="contact-label">微信</div>
+                    <div class="contact-value">点击添加</div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">📧</div>
+                    <div class="contact-label">邮箱</div>
+                    <div class="contact-value"><a href="mailto:junde@art.com">651402964@qq.com</a></div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">📍</div>
+                    <div class="contact-label">地址</div>
+                    <div class="contact-value">牧云国际大厦</div>
+                </div>
+            </div>
+            
+            <div class="map-container">
+                <a href="https://map.baidu.com/search/%E6%83%A0%E5%B7%9E%E5%B8%82%E6%83%A0%E9%98%B3%E5%8C%BA%E7%89%A7%E4%BA%91%E5%9B%BD%E9%99%85%E5%A4%A7%E5%8E%A6" target="_blank" style="display:block;width:100%;height:100%;background:var(--cream);display:flex;align-items:center;justify-content:center;color:var(--primary);text-decoration:none;">
+                    <div style="text-align:center;">
+                        <div style="font-size:2rem;margin-bottom:10px;">📍</div>
+                        <div style="font-weight:500;">惠州市惠阳区牧云国际大厦</div>
+                        <div style="font-size:0.8rem;color:var(--gray);margin-top:5px;">点击查看地图导航</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 询价表单弹窗 -->
+    <div class="modal-overlay" id="inquiryModal">
+        <div class="modal-container">
+            <button class="modal-close" onclick="closeInquiryModal()">×</button>
+            <div class="modal-title" style="text-align:center;padding-bottom:20px;border-bottom:1px solid #eee;">
+                <span style="font-size:1.3rem;font-weight:600;">提交询价</span>
+            </div>
+            <div style="padding:20px;">
+                <div style="margin-bottom:15px;">
+                    <label style="display:block;margin-bottom:8px;font-weight:500;color:#333;">姓名 <span style="color:red;">*</span></label>
+                    <input type="text" id="inquiryName" placeholder="请输入您的姓名" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:1rem;box-sizing:border-box;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;margin-bottom:8px;font-weight:500;color:#333;">电话 <span style="color:red;">*</span></label>
+                    <input type="tel" id="inquiryPhone" placeholder="请输入您的电话号码" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:1rem;box-sizing:border-box;">
+                </div>
+                <button type="button" onclick="submitInquiryForm()" style="width:100%;padding:14px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:1rem;font-weight:500;cursor:pointer;">确认提交</button>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal-container { background: white; border-radius: 16px; width: 100%; max-width: 400px; position: relative; animation: modalSlideIn 0.3s ease; }
+        @keyframes modalSlideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-close { position: absolute; top: 15px; right: 15px; width: 32px; height: 32px; border: none; background: #f5f5f5; border-radius: 50%; font-size: 1.2rem; cursor: pointer; z-index: 10; }
+    </style>
+
+    <!-- Bottom Nav -->
+    <style>
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.98); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -5px 30px rgba(0,0,0,0.1); z-index: 1000; padding-bottom: env(safe-area-inset-bottom, 12px); }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; text-decoration: none; color: var(--gray); font-size: 0.7rem; transition: all 0.4s; }
+        .nav-item.active { color: var(--accent); }
+        .nav-icon { font-size: 1.4rem; }
+        .nav-spacer { height: 80px; }
+        @media (max-width: 480px) { .section { padding: 60px 0; } .section-title { font-size: 1.5rem; } .logo-container { flex-direction: column; gap: 10px; } .logo-name { align-items: center; } }
+    </style>
+
+    <div class="nav-spacer"></div>
+
+    <nav<nav class="bottom-nav">
+        <a href="#home" class="nav-item active" onclick="setActiveNav(this)">
+            <span class="nav-icon">🏠</span>
+            <span>首页</span>
+        </a>
+        <a href="#works" class="nav-item" onclick="setActiveNav(this)">
+            <span class="nav-icon">🐴</span>
+            <span>案例</span>
+        </a>
+        <a href="#pricing" class="nav-item" onclick="setActiveNav(this)">
+            <span class="nav-icon">💰</span>
+            <span>价格</span>
+        </a>
+        <a href="#contact" class="nav-item" onclick="setActiveNav(this)">
+            <span class="nav-icon">📞</span>
+            <span>联系</span>
+        </a>
+    </nav>
+
+        <script>
+        // Loading 加载动画
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loading = document.getElementById('loading');
+                if(loading) loading.style.display = 'none';
+            }, 800);
+        });
+
+        // 询价表单相关
+        let currentInquiryType = '';
+        
+        function submitInquiry(type) {
+            currentInquiryType = type;
+            const modal = document.getElementById('inquiryModal');
+            if (modal) {
+                modal.classList.add('active');
+                document.getElementById('inquiryName').value = '';
+                document.getElementById('inquiryPhone').value = '';
+                document.getElementById('inquiryName').focus();
+            }
+        }
+        
+        function closeInquiryModal() {
+            const modal = document.getElementById('inquiryModal');
+            if (modal) modal.classList.remove('active');
+        }
+        
+        function submitInquiryForm() {
+            const name = document.getElementById('inquiryName').value.trim();
+            const phone = document.getElementById('inquiryPhone').value.trim();
+            
+            if (!name) {
+                alert('请输入姓名');
+                document.getElementById('inquiryName').focus();
+                return;
+            }
+            if (!phone) {
+                alert('请输入电话');
+                document.getElementById('inquiryPhone').focus();
+                return;
+            }
+            
+            // 发送到后端
+            fetch('/api/inquiry', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    name: name,
+                    phone: phone,
+                    type: currentInquiryType
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('提交成功！我们会尽快联系您。');
+                    closeInquiryModal();
+                } else {
+                    alert(data.error || '提交失败，请重试');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('提交失败，请检查网络');
+            });
+        }
+
+        // 下拉刷新功能
+        (function() {
+            const pullRefresh = document.getElementById('pullRefresh');
+            if (!pullRefresh) return;
+            
+            let startY = 0;
+            let isPulling = false;
+            let isRefreshing = false;
+            
+            document.addEventListener('touchstart', function(e) {
+                if (window.scrollY === 0 && !isRefreshing) {
+                    startY = e.touches[0].clientY;
+                }
+            }, { passive: true });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (window.scrollY === 0 && !isRefreshing) {
+                    const currentY = e.touches[0].clientY;
+                    const diff = currentY - startY;
+                    
+                    if (diff > 0 && diff < 150) {
+                        isPulling = true;
+                        pullRefresh.style.top = (diff - 50) + 'px';
+                        pullRefresh.style.opacity = diff / 100;
+                        
+                        if (diff > 80) {
+                            pullRefresh.querySelector('.pull-refresh-text').textContent = '↓ 释放刷新';
+                        } else {
+                            pullRefresh.querySelector('.pull-refresh-text').textContent = '↓ 下拉刷新';
+                        }
+                        e.preventDefault();
+                    }
+                }
+            }, { passive: false });
+            
+            document.addEventListener('touchend', function(e) {
+                if (isPulling && !isRefreshing) {
+                    const currentY = e.changedTouches[0].clientY;
+                    const diff = currentY - startY;
+                    
+                    if (diff > 80) {
+                        // 开始刷新
+                        isRefreshing = true;
+                        pullRefresh.querySelector('.pull-refresh-text').textContent = '↻ 刷新中...';
+                        pullRefresh.style.top = '0';
+                        pullRefresh.style.opacity = '1';
+                        
+                        // 模拟刷新（重新加载页面）
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        // 取消刷新
+                        pullRefresh.style.top = '-50px';
+                        pullRefresh.style.opacity = '0';
+                    }
+                    
+                    isPulling = false;
+                }
+            });
+        })();
+
+        // Navigation 底部导航
+        function setActiveNav(el) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // Pricing Panel Switch 价格核算标签切换
+        function switchPanel(panel) {
+            document.querySelectorAll('.pricing-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.pricing-panel').forEach(p => p.classList.remove('active'));
+            const panelEl = document.getElementById(panel + '-panel');
+            if(panelEl) panelEl.classList.add('active');
+        }
+
+        // Works Filter 案例筛选
+        // =============================================
+        // 案例长图 — 核心配置（直接改 URL 即可更新案例图）
+        // =============================================
+        const CASE_IMG_URL = 'static/01.jpg';
+
+        // 页面加载时直接显示图片，加载完隐藏 loading 状态
+        (function initWorksImage() {
+            const img = document.getElementById('worksDirectImg');
+            const loadingEl = document.getElementById('worksImgLoading');
+            const wrap = document.getElementById('worksImgWrap');
+
+            if (!img) return;
+
+            img.onload = function() {
+                if (loadingEl) loadingEl.classList.add('hidden');
+                img.classList.remove('hidden');
+            };
+            img.onerror = function() {
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<span>🖼️</span><span>案例图加载失败</span>';
+                }
+            };
+
+            // 图片加载中禁止右键/保存
+            if (wrap) {
+                wrap.addEventListener('contextmenu', function(e) { e.preventDefault(); }, { passive: true });
+            }
+            if (img) {
+                img.addEventListener('contextmenu', function(e) { e.preventDefault(); }, { passive: true });
+                img.addEventListener('selectstart', function(e) { e.preventDefault(); }, { passive: true });
+                img.addEventListener('dragstart', function(e) { e.preventDefault(); }, { passive: true });
+            }
+        })();
+
+        window.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const caseModal = document.getElementById('caseModal');
+                if (caseModal) { caseModal.classList.remove('active'); document.body.style.overflow = ''; }
+            }
+        });
+
+        // 显示微信二维码（复用案例弹窗）
+        function showQRCode() {
+            const modal = document.getElementById('caseModal');
+            const header = document.querySelector('.case-modal-title');
+            const img = document.getElementById('caseFullImg');
+            if (!modal) return;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            if (header) header.textContent = '扫码添加微信';
+            if (img) {
+                img.src = 'static/wechat-qrcode.png';
+                img.alt = '微信二维码';
+                img.style.display = 'block';
+            }
+        }
+
+        // 不锈钢雕塑价格计算（基于表面积）
+        function updateSculptureCalc() {
+            const shape = document.querySelector('input[name="shape"]:checked');
+            const surface = document.querySelector('input[name="surface"]:checked');
+            const difficulty = document.querySelector('input[name="difficulty"]:checked');
+            const lengthEl = document.getElementById('sculptureLength');
+            const widthEl = document.getElementById('sculptureWidth');
+            const heightEl = document.getElementById('sculptureHeight');
+            
+            if(!shape || !surface || !difficulty || !lengthEl || !widthEl || !heightEl) return;
+            
+            // 先获取尺寸值
+            const length = parseFloat(lengthEl.value) || 0;
+            const width = parseFloat(widthEl.value) || 0;
+            const height = parseFloat(heightEl.value) || 0;
+            
+            // 获取DOM元素
+            const sizeDetailEl = document.getElementById('sizeDetail');
+            const surfaceAreaEl = document.getElementById('surfaceArea');
+            const unitPriceEl = document.getElementById('unitPrice');
+            const calcMethodEl = document.getElementById('calcMethod');
+            const sculpturePriceEl = document.getElementById('sculpturePrice');
+            
+            // 如果尺寸未填，显示提示
+            if (length === 0 || width === 0 || height === 0) {
+                if(sizeDetailEl) sizeDetailEl.textContent = '请输入尺寸';
+                if(surfaceAreaEl) surfaceAreaEl.textContent = '- ㎡';
+                if(unitPriceEl) unitPriceEl.textContent = '¥-/㎡';
+                if(calcMethodEl) calcMethodEl.textContent = '-';
+                if(sculpturePriceEl) sculpturePriceEl.textContent = '0';
+                return;
+            }
+            
+            // 计算表面积
+            let surfaceArea = 0;
+            let calcMethod = '';
+            
+            if (shape.value === 'geo') {
+                surfaceArea = 2 * (length*width + length*height + width*height);
+                calcMethod = '几何近似法';
+            } else {
+                const volume = length * width * height;
+                const equivalentRadius = Math.pow((3 * volume) / (4 * Math.PI), 1/3);
+                const complexityFactor = difficulty.value === 'hard' ? 2.2 : 1.8;
+                surfaceArea = 4 * Math.PI * Math.pow(equivalentRadius, 2) * complexityFactor;
+                calcMethod = '体积等效法';
+            }
+            
+            // 确定单价
+            let unitPrice = 0;
+            if (shape.value === 'geo' && surface.value === 'mirror') unitPrice = difficulty.value === 'hard' ? 1800 : 1500;
+            else if (shape.value === 'geo' && surface.value === 'paint') unitPrice = difficulty.value === 'hard' ? 1250 : 800;
+            else if (shape.value === 'irregular' && surface.value === 'mirror') unitPrice = difficulty.value === 'hard' ? 3300 : 2600;
+            else if (shape.value === 'irregular' && surface.value === 'paint') unitPrice = difficulty.value === 'hard' ? 2100 : 1700;
+            
+            // 计算总价（含20%隐藏利润）
+            const totalPrice = Math.ceil(surfaceArea * unitPrice * 1.20);
+            
+            // 更新显示
+            if(sizeDetailEl) sizeDetailEl.textContent = length.toFixed(2) + '×' + width.toFixed(2) + '×' + height.toFixed(2) + ' m';
+            if(surfaceAreaEl) surfaceAreaEl.textContent = '~' + surfaceArea.toFixed(2) + ' ㎡';
+            if(unitPriceEl) unitPriceEl.textContent = '¥' + unitPrice.toLocaleString() + '/㎡';
+            if(calcMethodEl) calcMethodEl.textContent = calcMethod;
+            if(sculpturePriceEl) sculpturePriceEl.textContent = totalPrice.toLocaleString();
+        }
+
+
+
+        // 标识价格计算
+        function updateSignCalc() {
+            const signType = document.getElementById('signType');
+            const signLength = document.getElementById('signLength');
+            const signWidth = document.getElementById('signWidth');
+            const installType = document.getElementById('installType');
+            const standHeightRow = document.getElementById('standHeightRow');
+            
+            if(!signType || !signLength || !installType) return;
+            
+            const length = parseFloat(signLength.value) || 0;
+            const width = parseFloat(signWidth?.value) || 0;
+            let makePrice = 0, installPrice = 0;
+            
+            if(standHeightRow) standHeightRow.style.display = signType.value === 'stand' ? 'block' : 'none';
+            
+            if (signType.value === 'led') makePrice = length * 500;
+            else if (signType.value === 'box') makePrice = Math.ceil(length * width * 950);
+            else if (signType.value === 'stand') makePrice = Math.ceil(length * (parseInt(document.getElementById('standHeight')?.value) || 750));
+            else if (signType.value === 'ground') makePrice = length * 1500;
+            
+            if (installType.value === 'cement') installPrice = 600;
+            else if (installType.value === 'crane50') installPrice = 2000;
+            
+            const signPriceEl = document.getElementById('signPrice');
+            if(signPriceEl) signPriceEl.textContent = (makePrice + installPrice).toLocaleString();
+        }
+
+        // 初始化
+        window.addEventListener('load', function() {
+            updateSculptureCalc();
+            updateSignCalc();
+        });
+    </script>
+</body>
+</html>
